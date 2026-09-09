@@ -513,6 +513,116 @@ $('#demoBtn').addEventListener('click', async () => {
   } catch (err) { toast('Demo failed to render'); }
 });
 
+/* ---------- microphone recording ----------
+ * MediaRecorder captures the mic; the take is decoded with the same
+ * decodeAudioData path as file tracks and dropped into the library, then
+ * loaded straight onto the platter. Recordings live in memory for the
+ * session only.
+ */
+const REC_MAX_MS = 30000;
+const rec = {
+  active: false, recorder: null, chunks: [], stream: null,
+  analyser: null, meterRaf: 0, timerInt: 0, startT: 0, discard: false,
+  count: 0,
+};
+const recBackdrop = $('#recBackdrop'), recTime = $('#recTime'), recLevelBar = $('#recLevelBar');
+
+function pickRecMime() {
+  const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+  return candidates.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+}
+
+async function startRecording() {
+  if (rec.active) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+    toast('Recording not supported in this browser'); return;
+  }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    toast('Microphone unavailable — check permission'); return;
+  }
+  try {
+    engine.ensure(); // shares the audio clock for the level meter
+    rec.stream = stream;
+    rec.chunks = [];
+    rec.discard = false;
+    const mime = pickRecMime();
+    rec.recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    rec.recorder.ondataavailable = e => { if (e.data && e.data.size) rec.chunks.push(e.data); };
+    rec.recorder.onstop = onRecStopped;
+    rec.recorder.start(250);
+    rec.analyser = engine.ctx.createAnalyser();
+    rec.analyser.fftSize = 512;
+    engine.ctx.createMediaStreamSource(stream).connect(rec.analyser);
+    rec.active = true;
+    rec.startT = performance.now();
+    recBackdrop.classList.remove('hidden');
+    recTime.textContent = '0:00';
+    rec.timerInt = setInterval(() => {
+      recTime.textContent = fmt((performance.now() - rec.startT) / 1000);
+    }, 250);
+    meterLoop();
+    setTimeout(() => { if (rec.active) stopRecording(); }, REC_MAX_MS);
+  } catch (err) {
+    console.error(err);
+    stream.getTracks().forEach(t => t.stop());
+    toast('Could not start recording');
+  }
+}
+
+function meterLoop() {
+  if (!rec.active || !rec.analyser) return;
+  const data = new Uint8Array(rec.analyser.fftSize);
+  rec.analyser.getByteTimeDomainData(data);
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v; }
+  const rms = Math.sqrt(sum / data.length);
+  recLevelBar.style.width = `${Math.min(100, rms * 260)}%`;
+  rec.meterRaf = requestAnimationFrame(meterLoop);
+}
+
+function stopRecording() {
+  if (!rec.active) return;
+  clearInterval(rec.timerInt);
+  cancelAnimationFrame(rec.meterRaf);
+  recBackdrop.classList.add('hidden');
+  rec.active = false;
+  if (rec.recorder && rec.recorder.state !== 'inactive') rec.recorder.stop();
+}
+
+function cancelRecording() {
+  rec.discard = true;
+  stopRecording();
+}
+
+function addRecording(blob) {
+  rec.count += 1;
+  const t = { title: `Recording ${rec.count}`, getFile: () => Promise.resolve(blob) };
+  state.tracks.push(t);
+  renderTracks();
+  playTrack(t);
+}
+
+function onRecStopped() {
+  rec.stream.getTracks().forEach(t => t.stop());
+  rec.stream = null;
+  rec.analyser = null;
+  if (rec.discard || !rec.chunks.length) {
+    rec.chunks = [];
+    if (!rec.discard) toast('Nothing recorded');
+    return;
+  }
+  const blob = new Blob(rec.chunks, { type: rec.recorder.mimeType || 'audio/webm' });
+  rec.chunks = [];
+  addRecording(blob);
+}
+
+$('#recBtn').addEventListener('click', startRecording);
+$('#recStop').addEventListener('click', stopRecording);
+$('#recCancel').addEventListener('click', cancelRecording);
+
 $('#backBtn').addEventListener('click', () => {
   engine.hold();
   keepAwake(false);
@@ -543,4 +653,4 @@ if (gyro.supported) {
 }
 showScreen('library');
 renderTracks();
-window.__spin = { state, engine, CONFIG, gyro, tick }; // debug handle
+window.__spin = { state, engine, CONFIG, gyro, tick, addRecording }; // debug handle

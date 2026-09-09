@@ -24,6 +24,7 @@
     <button id="pickFolder" class="btn primary hidden">📁&nbsp; Choose folder</button>
     <label class="btn primary" for="pickFiles">🎵&nbsp; Choose songs</label>
     <input id="pickFiles" type="file" multiple accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.oga,.flac,.webm">
+    <button id="recBtn" class="btn ghost">🎙️&nbsp; Record</button>
     <button id="demoBtn" class="btn ghost">✨&nbsp; Demo loop</button>
   </section>
   <p id="pickHint" class="hint">On iPhone: tap <b>Choose songs</b>, then in the Files picker use <b>⋯ → Select</b> to grab every MP3 in your folder at once.</p>
@@ -93,6 +94,19 @@
 
   <button id="motionBtn" class="btn primary motion hidden">🌀&nbsp; Enable motion sensors</button>
 </main>
+
+<div id="recBackdrop" class="rec-backdrop hidden">
+  <div class="rec-card">
+    <div class="rec-live"><span class="rec-dot"></span><span>REC</span></div>
+    <div id="recTime">0:00</div>
+    <div id="recLevel"><div id="recLevelBar"></div></div>
+    <p class="hint">Sing, hum, beatbox — then spin it.<br>Stops by itself at 30&nbsp;s.</p>
+    <div class="rec-actions">
+      <button id="recCancel" class="btn ghost">Cancel</button>
+      <button id="recStop" class="btn primary">⏹&nbsp; Stop &amp; spin</button>
+    </div>
+  </div>
+</div>
 
 <div id="toast" class="hidden"></div>
 

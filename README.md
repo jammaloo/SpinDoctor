@@ -47,6 +47,14 @@ On the library screen:
 Supported: `.mp3 .m4a .aac .wav .ogg .flac .webm`. Songs are decoded on the
 phone, nothing is uploaded anywhere.
 
+## Recording your own
+
+Tap **🎙️ Record**, make some noise (up to 30 seconds), then **Stop & spin**.
+The take is added to the library as "Recording 1, 2, …" and drops straight
+onto the platter — where you can scrub it back and forth like any other song.
+The mic is only used while the red dot is pulsing; recordings live in memory
+for the session and are never uploaded.
+
 ## How it works
 
 - `deviceorientation` events give the phone's orientation; the app projects the
