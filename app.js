@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Spin DJ — your phone is the platter.
+ * Spin Doctor — your phone is the platter.
  *
  * Physical model: a record platter spinning clockwise (viewed from above) plays
  * the song forward; counter-clockwise plays it in reverse. Spin rate maps 1:1

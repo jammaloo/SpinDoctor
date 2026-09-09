@@ -1,4 +1,4 @@
-# Spin DJ 🎛️
+# Spin Doctor 🎛️
 
 Put a phone flat on a table and physically rotate it. The gyroscope turns it
 into a record platter:

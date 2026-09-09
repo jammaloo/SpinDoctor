@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static file server for Spin DJ.
+"""Static file server for Spin Doctor.
 
 Browsers only expose motion sensors on secure origins, so by default this
 serves over HTTPS using a self-signed certificate generated with the `openssl`
@@ -35,7 +35,7 @@ def make_cert():
         ["openssl", "req", "-x509", "-newkey", "rsa:2048", "-sha256",
          "-nodes", "-days", "3650",
          "-keyout", key, "-out", cert,
-         "-subj", "/CN=spin-dj.local",
+         "-subj", "/CN=spin-doctor.local",
          "-addext", "subjectAltName=DNS:localhost,IP:127.0.0.1"],
         check=True, capture_output=True,
     )
@@ -80,7 +80,7 @@ def main():
 
     ip = lan_ip()
     print()
-    print("  Spin DJ is spinning up.")
+    print("  Spin Doctor is spinning up.")
     print()
     print(f"  On this Mac:   {scheme}://localhost:{args.port}")
     print(f"  On your phone: {scheme}://{ip}:{args.port}   (same Wi-Fi)")
