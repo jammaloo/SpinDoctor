@@ -29,8 +29,9 @@ secure origins, so HTTPS is required for the phone to spin).
 - **On this computer:** `https://localhost:8443` — accept the cert warning once.
   Spin by dragging the record in circles or using the scroll wheel.
 - **On your phone:** open `https://<your-mac-ip>:8443` (same Wi-Fi), accept the
-  certificate warning (iOS: **Show Details → visit this website**), then tap
-  **🌀 Enable motion sensors** and allow the permission.
+  certificate warning (iOS: **Show Details → visit this website**), then just
+  tap anywhere — iOS asks for motion access on your first touch. Missed or
+  denied it? The **🌀 Enable motion sensors** button in the player asks again.
 
 Options: `--port 9000` for a different port, `--http` for plain HTTP (desktop
 testing only — phone gyro will not work over plain HTTP).
@@ -52,8 +53,18 @@ phone, nothing is uploaded anywhere.
 Tap **🎙️ Record**, make some noise (up to 30 seconds), then **Stop & spin**.
 The take is added to the library as "Recording 1, 2, …" and drops straight
 onto the platter — where you can scrub it back and forth like any other song.
-The mic is only used while the red dot is pulsing; recordings live in memory
-for the session and are never uploaded.
+While a recording is loaded, a red dot appears next to its title at the top of
+the player: one tap starts your next take (playback pauses while recording so
+the speaker doesn't bleed into the mic). The mic is only used while the red
+dot is pulsing; recordings live in memory for the session and are never
+uploaded.
+
+## Settings
+
+The **⚙️** button in the player opens a sensitivity slider. It scales how much
+song a given spin scrubs: **×0.25** makes spins gentle and precise, **×4**
+turns a lazy flick into full chipmunk. The setting is remembered on your
+device. Cruise (33⅓) is unaffected — it always plays at normal speed.
 
 ## How it works
 
@@ -66,8 +77,8 @@ for the session and are never uploaded.
   mirrored needle position, which gives you real vinyl-style scratch.
 - Speed also drives a low-pass filter (slow = dark) and the RPM/pitch badges.
 
-Tunables live at the top of `app.js` (`CONFIG`): `REV_SEC` (spin sensitivity),
-`MAX_RATE` (chipmunk ceiling), inertia decay, etc.
+Tunables live at the top of `app.js` (`CONFIG`): `REV_SEC` (base spin
+sensitivity), `MAX_RATE` (chipmunk ceiling), inertia decay, etc.
 
 ## Notes
 

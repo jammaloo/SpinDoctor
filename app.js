@@ -40,6 +40,7 @@ const state = {
   lastGyroT: 0,
   cruise: true,
   cruiseOmega: TAU / CONFIG.REV_SEC,
+  sensitivity: 1,    // settings slider: how far a given spin scrubs (0.25–4)
   everSpun: false,
 };
 
@@ -223,6 +224,7 @@ async function makeDemoBuffer() {
 const gyro = {
   supported: 'DeviceOrientationEvent' in window,
   needPerm: false,
+  granted: false,
   attached: false,
   active: false,
   dead: false,
@@ -269,6 +271,7 @@ async function requestGyro() {
     if (gyro.needPerm) {
       const res = await DeviceOrientationEvent.requestPermission();
       if (res !== 'granted') { toast('Motion permission denied — drag the record instead'); return; }
+      gyro.granted = true;
     }
     attachGyro();
     motionBtn.classList.add('hidden');
@@ -366,7 +369,7 @@ function tick(dt) {
   }
 
   const w = state.gyroOmega + state.handOmega + (state.cruise ? state.cruiseOmega : 0);
-  engine.setRate(w * CONFIG.REV_SEC / TAU);
+  engine.setRate(w * CONFIG.REV_SEC * state.sensitivity / TAU);
 
   // visuals
   platter.style.transform = `rotate(${state.platterAngle}rad)`;
@@ -410,7 +413,7 @@ function markSpun(speed) {
 
 /* ================= screens & tracks ================= */
 const libraryEl = $('#library'), playerEl = $('#player');
-const motionBtn = $('#motionBtn'), cruiseBtn = $('#cruiseBtn');
+const motionBtn = $('#motionBtn'), cruiseBtn = $('#cruiseBtn'), recAgainBtn = $('#recAgainBtn');
 let wakeLock = null;
 
 function showScreen(name) {
@@ -445,7 +448,8 @@ async function playTrack(t) {
     state.platterAngle = 0;
     nowTitle.textContent = t.title;
     labelTitle.textContent = t.title;
-    motionBtn.classList.toggle('hidden', !gyro.needPerm || gyro.attached);
+    motionBtn.classList.toggle('hidden', !gyro.needPerm || gyro.granted);
+    recAgainBtn.classList.toggle('hidden', !t.isRecording);
     keepAwake(true);
   } catch (err) {
     console.error(err);
@@ -545,6 +549,7 @@ async function startRecording() {
   }
   try {
     engine.ensure(); // shares the audio clock for the level meter
+    engine.hold();   // park playback so the speaker doesn't bleed into the take
     rec.stream = stream;
     rec.chunks = [];
     rec.discard = false;
@@ -599,7 +604,7 @@ function cancelRecording() {
 
 function addRecording(blob) {
   rec.count += 1;
-  const t = { title: `Recording ${rec.count}`, getFile: () => Promise.resolve(blob) };
+  const t = { title: `Recording ${rec.count}`, isRecording: true, getFile: () => Promise.resolve(blob) };
   state.tracks.push(t);
   renderTracks();
   playTrack(t);
@@ -622,6 +627,7 @@ function onRecStopped() {
 $('#recBtn').addEventListener('click', startRecording);
 $('#recStop').addEventListener('click', stopRecording);
 $('#recCancel').addEventListener('click', cancelRecording);
+recAgainBtn.addEventListener('click', startRecording);
 
 $('#backBtn').addEventListener('click', () => {
   engine.hold();
@@ -637,6 +643,33 @@ cruiseBtn.addEventListener('click', () => {
 
 motionBtn.addEventListener('click', requestGyro);
 
+/* ---------- settings ---------- */
+const setBackdrop = $('#setBackdrop'), sensSlider = $('#sensSlider'),
+      sensVal = $('#sensVal'), sensHint = $('#sensHint');
+
+function refreshSensUI() {
+  sensSlider.value = state.sensitivity;
+  sensVal.textContent = `×${state.sensitivity.toFixed(2)}`;
+  sensHint.innerHTML = `One spin plays <b>${(CONFIG.REV_SEC / state.sensitivity).toFixed(1)} s</b> of song.` +
+    `<br>Higher = the same spin scrubs further (more chipmunk).`;
+}
+
+function applySensitivity(v) {
+  state.sensitivity = clamp(v, 0.25, 4);
+  try { localStorage.setItem('spindoctor.sensitivity', String(state.sensitivity)); } catch (e) { /* private mode */ }
+  refreshSensUI();
+}
+
+$('#cogBtn').addEventListener('click', () => {
+  refreshSensUI();
+  setBackdrop.classList.remove('hidden');
+});
+$('#setClose').addEventListener('click', () => setBackdrop.classList.add('hidden'));
+setBackdrop.addEventListener('click', e => {
+  if (e.target === setBackdrop) setBackdrop.classList.add('hidden');
+});
+sensSlider.addEventListener('input', () => applySensitivity(parseFloat(sensSlider.value)));
+
 let toastTimer = 0;
 function toast(msg) {
   const el = $('#toast');
@@ -647,10 +680,28 @@ function toast(msg) {
 }
 
 /* ================= init ================= */
+function askMotionOnFirstTouch() {
+  const askOnce = () => {
+    document.removeEventListener('pointerdown', askOnce, true);
+    requestGyro();
+  };
+  document.addEventListener('pointerdown', askOnce, { capture: true });
+}
+
 if (gyro.supported) {
   gyro.needPerm = typeof DeviceOrientationEvent.requestPermission === 'function';
   if (!gyro.needPerm) attachGyro(); // Android / desktop: no permission gate
 }
+if (gyro.needPerm) {
+  // iOS gates motion behind a per-page prompt that must come from a user
+  // gesture — ask on the first touch so motion works without hunting for a
+  // button. The chip in the player stays as a fallback if this is denied.
+  askMotionOnFirstTouch();
+}
+try {
+  const saved = parseFloat(localStorage.getItem('spindoctor.sensitivity'));
+  if (saved >= 0.25 && saved <= 4) state.sensitivity = saved;
+} catch (e) { /* localStorage unavailable */ }
 showScreen('library');
 renderTracks();
-window.__spin = { state, engine, CONFIG, gyro, tick, addRecording }; // debug handle
+window.__spin = { state, engine, CONFIG, gyro, tick, addRecording, askMotionOnFirstTouch }; // debug handle

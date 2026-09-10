@@ -326,3 +326,26 @@ h1 {
 .rec-card .hint { line-height: 1.55; }
 .rec-actions { display: flex; gap: 10px; margin-top: 4px; }
 
+/* record-again shortcut in the player top bar */
+.chip.rec-again {
+  display: flex; align-items: center; justify-content: center;
+  padding: 9px 13px;
+  border-color: #4a2626;
+}
+.chip.rec-again .rec-dot { animation: none; width: 11px; height: 11px; }
+
+/* settings card */
+.set-title { font-weight: 800; font-size: 18px; letter-spacing: .02em; }
+.set-label {
+  display: flex; justify-content: space-between; align-items: baseline;
+  width: 100%;
+  font-weight: 700; font-size: 14px;
+  color: var(--mut);
+}
+#sensVal { color: var(--acc); font-variant-numeric: tabular-nums; font-size: 15px; }
+.rec-card input[type="range"] {
+  width: 100%;
+  accent-color: var(--acc);
+  touch-action: manipulation;
+}
+

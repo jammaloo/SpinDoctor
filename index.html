@@ -43,7 +43,9 @@
   <nav class="bar">
     <button id="backBtn" class="chip">‹ Library</button>
     <div id="nowTitle">—</div>
+    <button id="recAgainBtn" class="chip rec-again hidden" title="Record another take" aria-label="Record another take"><span class="rec-dot"></span></button>
     <button id="cruiseBtn" class="chip toggle" title="Auto-spin at listening speed" aria-pressed="true">33⅓</button>
+    <button id="cogBtn" class="chip" title="Settings" aria-label="Settings">⚙️</button>
   </nav>
 
   <div id="deck">
@@ -105,6 +107,16 @@
       <button id="recCancel" class="btn ghost">Cancel</button>
       <button id="recStop" class="btn primary">⏹&nbsp; Stop &amp; spin</button>
     </div>
+  </div>
+</div>
+
+<div id="setBackdrop" class="rec-backdrop hidden">
+  <div class="rec-card">
+    <div class="set-title">Settings</div>
+    <label class="set-label" for="sensSlider"><span>Spin sensitivity</span><span id="sensVal">×1.0</span></label>
+    <input id="sensSlider" type="range" min="0.25" max="4" step="0.05" value="1">
+    <p class="hint" id="sensHint">One spin plays 1.8 s of song.<br>Higher = the same spin scrubs further (more chipmunk).</p>
+    <button id="setClose" class="btn primary">Done</button>
   </div>
 </div>
 
