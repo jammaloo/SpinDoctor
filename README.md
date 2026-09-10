@@ -23,18 +23,18 @@ python3 server.py
 ```
 
 Then open the printed URL. Defaults to HTTPS on port 8443 with a self-signed
-certificate (created for you on first run — browsers only expose gyro data on
+certificate (created for you on first run; browsers only expose gyro data on
 secure origins, so HTTPS is required for the phone to spin).
 
 - **On this computer:** `https://localhost:8443` — accept the cert warning once.
   Spin by dragging the record in circles or using the scroll wheel.
 - **On your phone:** open `https://<your-mac-ip>:8443` (same Wi-Fi), accept the
   certificate warning (iOS: **Show Details → visit this website**), then just
-  tap anywhere — iOS asks for motion access on your first touch. Missed or
+  tap anywhere. iOS asks for motion access on your first touch. Missed or
   denied it? The **🌀 Enable motion sensors** button in the player asks again.
 
 Options: `--port 9000` for a different port, `--http` for plain HTTP (desktop
-testing only — phone gyro will not work over plain HTTP).
+testing only; phone gyro will not work over plain HTTP).
 
 ## Loading your MP3s
 
@@ -52,7 +52,7 @@ phone, nothing is uploaded anywhere.
 
 Tap **🎙️ Record**, make some noise (up to 30 seconds), then **Stop & spin**.
 The take is added to the library as "Recording 1, 2, …" and drops straight
-onto the platter — where you can scrub it back and forth like any other song.
+onto the platter, where you can scrub it back and forth like any other song.
 While a recording is loaded, a red dot appears next to its title at the top of
 the player: one tap starts your next take (playback pauses while recording so
 the speaker doesn't bleed into the mic). The mic is only used while the red
@@ -64,7 +64,7 @@ uploaded.
 The **⚙️** button in the player opens a sensitivity slider. It scales how much
 song a given spin scrubs: **×0.25** makes spins gentle and precise, **×4**
 turns a lazy flick into full chipmunk. The setting is remembered on your
-device. Cruise (33⅓) is unaffected — it always plays at normal speed.
+device. Cruise (33⅓) always plays at normal speed.
 
 ## How it works
 
@@ -82,7 +82,7 @@ sensitivity), `MAX_RATE` (chipmunk ceiling), inertia decay, etc.
 
 ## Notes
 
-- Songs loop forever at the edges — the platter never runs out of groove.
+- Songs loop forever at the edges; the platter never runs out of groove.
 - Keep the screen awake is requested automatically while a song is loaded.
 - Works best in landscape-free, flat-on-a-table mode. A phone case thicker than
   the table adds wobble — that's physics, not a bug.
